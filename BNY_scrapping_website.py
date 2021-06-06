@@ -9,7 +9,7 @@ from tkinter import filedialog
 
 # !jupyter notebook --NotebookApp.iopub_data_rate_limit=1.0e10
 
-def get_nev(df):
+def GET_NEV(df):
     search = pd.DataFrame(df)
     my_urls = search['URL']
 
@@ -324,7 +324,7 @@ if ccbox(msg, title):  # show a Continue/Cancel dialog
     goal_link = pd.merge(df, df_search, on='CNPJ', how='left')
     links = goal_link[(goal_link['CHECK'] == 'EXTRACT')].copy()
 
-    df_final = get_nev(links)
+    df_final = GET_NEV(links)
     my_dict = {'data': [], 'cota': []}
     res = [ele for ele in df_final['INFO'] if ele.strip()]
 

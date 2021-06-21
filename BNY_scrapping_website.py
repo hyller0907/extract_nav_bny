@@ -336,18 +336,38 @@ if ccbox(msg, title):  # show a Continue/Cancel dialog
         for info in x:
             if info.strip():
                 resultado.append(info)
+                #print(info)
 
-        my_dict['data'].append(resultado[1])
-        my_dict['cota'].append(resultado[3])
+        resultado_clean = [i for i in resultado if i!='nao_encontrada']
+        
+        today = date.today()
+        target_day = today - BDay(1)
+        extract_carteiras_day = target_day.strftime("%d/%m/%Y")
+        
+        '''
+        Por algum motivo o site esta apresentando erro
+        em algumas solicitações de cota
+        
+        Verificar posteriormente o motivo
+        '''
+        
+        if len(resultado_clean) > 0:
+            my_dict['data'].append(resultado_clean[1])
+            my_dict['cota'].append(resultado_clean[3])
+            
+        else:
+            my_dict['data'].append(extract_carteiras_day)
+            my_dict['cota'].append('NaN')
+            continue
 
         count += 1
 
     df_final['DATA'] = my_dict['data']
     df_final['COTA'] = my_dict['cota']
-    df_final = df_final.drop(['URL', 'CHECK', 'INFO'], axis=1)
-    df_final = df_final.reset_index(drop=True)
-
-    df_final.to_excel('RESULT.xlsx', index=False)
+    df_final = df_final.drop(['CHECK', 'INFO'], axis = 1)
+    df_final = df_final.reset_index(drop = True)
+    
+    df_final.to_excel('RESULT.xlsx', index = False)
     print('Script Finalizado')
 
 else:  # user chose Cancel

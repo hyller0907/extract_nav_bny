@@ -1,3 +1,5 @@
+#!/home/hvianna/anaconda3/bin/python
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -5,9 +7,15 @@ from easygui import *
 from tkinter import *
 import tkinter as tk
 from tkinter import filedialog
+from datetime import date
+from pandas.tseries.offsets import BDay
 
-
-# !jupyter notebook --NotebookApp.iopub_data_rate_limit=1.0e10
+'''
+Your script you just need to make your script executable.
+Something like chmod a+x [your-script].py should make it
+executable and then you can just call ./[your-script.py]
+in shell.
+'''
 
 def GET_NEV(df):
     search = pd.DataFrame(df)
@@ -367,7 +375,7 @@ if ccbox(msg, title):  # show a Continue/Cancel dialog
     df_final = df_final.drop(['CHECK', 'INFO'], axis = 1)
     df_final = df_final.reset_index(drop = True)
     
-    df_final.to_excel('RESULT.xlsx', index = False)
+    df_final.to_excel('output_file.xlsx', index = False)
     print('Script Finalizado')
 
 else:  # user chose Cancel

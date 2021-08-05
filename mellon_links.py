@@ -3,63 +3,13 @@
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
-from easygui import *
-from tkinter import *
-import tkinter as tk
-from tkinter import filedialog
-from datetime import date
-from pandas.tseries.offsets import BDay
-
-'''
-Your script you just need to make your script executable.
-Something like chmod a+x [your-script].py should make it
-executable and then you can just call ./[your-script.py]
-in shell.
-'''
-
-def GET_NEV(df):
-    search = pd.DataFrame(df)
-    my_urls = search['URL']
-
-    headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
-
-    nev_extracted = []
-    for consulta in my_urls:
-
-        try:
-            with requests.Session() as s:
-
-                s.trust_env = False
-
-                # Finding the authentication needed to gain access to Pegasus Module
-                r = s.get(consulta, headers=headers)
-
-                # Extracting the complete url with all the parameter
-                soup = BeautifulSoup(r.content, 'html.parser')
-                x = soup.find('div', class_="dadosCotas")
-                nev_extracted.append(x.text)
-
-            s.close()
-
-        except:
-            nev_extracted.append('nao_encontrada')
-            continue
-
-    search['INFO'] = nev_extracted
-    return search
 
 
-# message / information to be displayed on the screen
-message = "WARNING: Gostaria de atualizar a lista existente dos fundos, disponíveis no site da BNY MELLON ?"
+def links_bny(name_output):
+    '''
+    Descrever função
 
-# title of the window
-title = "Security Warning"
-
-# creating a continue cancel box
-output = ccbox(message, title)
-
-# if user pressed continue
-if output:
+    '''
 
     headers = {'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:81.0) Gecko/20100101 Firefox/81.0'}
 
@@ -67,13 +17,10 @@ if output:
 
         s.trust_env = False
 
-        '''
-        Accessing the BNY web site and making the
-        post request form to each one of the asset management
-
-        '''
-
+        # Accessing the BNY web site and making the
+        # post request form to each one of the asset management
         # Finding the authentication needed to gain access to Pegasus Module
+
         main_page = 'https://servicosfinanceiros.bnymellon.com/AppPages/investimentfunds/funds.aspx'
         r = s.get(main_page, headers=headers)
 
@@ -98,10 +45,8 @@ if output:
         busca['__VIEWSTATE'].append(div_tags[2]['value'])
         busca['__VIEWSTATEGENERATOR'].append(div_tags[3]['value'])
 
-        '''
-        Getting a list all the Asset management
-        in BNY web site    
-        '''
+        # Getting a list all the Asset management
+        # in BNY web site
 
         inicial_list = {'ASSET': [], 'ID_CONSULTA': []}
 
@@ -121,10 +66,8 @@ if output:
                 inicial_list['ASSET'].append(conteudo_asset)
                 inicial_list['ID_CONSULTA'].append(id_asset)
 
-        '''
-        Consulting each on each one of the IDs
-        to get all the funds on the website
-        '''
+        # Consulting each on each one of the IDs
+        # to get all the funds on the website
 
         my_pages = []
         controle = {'TOTAL': []}
@@ -142,12 +85,11 @@ if output:
         for asset_id in gestores_ids:
 
             try:
-                '''
-                EXTRACT INFORMATION (FROM FIRST PAGE)
-                    - NOME
-                    - CNPJ
-                    - ITEM
-                '''
+
+                # EXTRACT INFORMATION (FROM FIRST PAGE)
+                #    - NOME
+                #    - CNPJ
+                #    - ITEM
 
                 mult_page = {
                     "__EVENTTARGET": 'ctl00$ContentPlaceHolder$grvFundos',
@@ -306,78 +248,8 @@ if output:
 
     s.close()
 
+    file_name = f'{name_output}.xlsx'
+
     df = pd.DataFrame(list_2)
-    df.to_excel('EXTRACTED_BNY.xlsx', index=False)
+    df.to_excel(file_name, index=False)
     print('Informações extraídas com sucesso')
-
-# pressed cancel
-else:
-    df = pd.read_excel('EXTRACTED_BNY.xlsx')
-    print('Etapa de atualização ignorada')
-    # sys.exit("Error message")
-
-msg = "Na etapa a seguir, você deve importar uma planilha em Excel com o CNPJ dos fundos\
-que deseja buscar, lembrando que o título da coluna deve ser 'CNPJ' (Consultar arquivo modelo_consulta.xlsx)"
-
-title = "Importar Serviço"
-
-if ccbox(msg, title):  # show a Continue/Cancel dialog
-    root = tk.Tk()
-    root.withdraw()
-    file_path = filedialog.askopenfilename()
-
-    df_search = pd.read_excel(file_path)
-    df_search['CHECK'] = 'EXTRACT'
-
-    goal_link = pd.merge(df, df_search, on='CNPJ', how='left')
-    links = goal_link[(goal_link['CHECK'] == 'EXTRACT')].copy()
-
-    df_final = GET_NEV(links)
-    my_dict = {'data': [], 'cota': []}
-    res = [ele for ele in df_final['INFO'] if ele.strip()]
-
-    count = 0
-    for i in res:
-        resultado = []
-        x = i.split('\n')
-
-        for info in x:
-            if info.strip():
-                resultado.append(info)
-                #print(info)
-
-        resultado_clean = [i for i in resultado if i!='nao_encontrada']
-        
-        today = date.today()
-        target_day = today - BDay(1)
-        extract_carteiras_day = target_day.strftime("%d/%m/%Y")
-        
-        '''
-        Por algum motivo o site esta apresentando erro
-        em algumas solicitações de cota
-        
-        Verificar posteriormente o motivo
-        '''
-        
-        if len(resultado_clean) > 0:
-            my_dict['data'].append(resultado_clean[1])
-            my_dict['cota'].append(resultado_clean[3])
-            
-        else:
-            my_dict['data'].append(extract_carteiras_day)
-            my_dict['cota'].append('NaN')
-            continue
-
-        count += 1
-
-    df_final['DATA'] = my_dict['data']
-    df_final['COTA'] = my_dict['cota']
-    df_final = df_final.drop(['CHECK', 'INFO'], axis = 1)
-    df_final = df_final.reset_index(drop = True)
-    
-    df_final.to_excel('output_file.xlsx', index = False)
-    print('Script Finalizado')
-
-else:  # user chose Cancel
-    print('Favor realizar a importação do seu modelo de consulta')
-    sys.exit(0)

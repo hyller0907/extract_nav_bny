@@ -248,8 +248,6 @@ def links_bny(name_output):
 
     s.close()
 
-    file_name = f'{name_output}.xlsx'
-
     df = pd.DataFrame(list_2)
-    df.to_excel(file_name, index=False)
+    df.to_excel(name_output, index=False)
     print('Informações extraídas com sucesso')

@@ -14,19 +14,7 @@ from pandas.tseries.offsets import BDay
 
 
 
-def extract_nav(file_input):
-    '''
-    bla bla bla bla
 
-    '''
-
-    df_search = pd.read_excel(input_file)
-    df_search['CHECK'] = 'EXTRACT'
-
-    goal_link = pd.merge(df, df_search, on='CNPJ', how='left')
-    links = goal_link[(goal_link['CHECK'] == 'EXTRACT')].copy()
-
-    df_final = GET_NEV(links)
     my_dict = {'data': [], 'cota': []}
     res = [ele for ele in df_final['INFO'] if ele.strip()]
 

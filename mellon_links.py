@@ -1,11 +1,10 @@
-#!/home/hvianna/anaconda3/bin/python
+from bs4 import BeautifulSoup
 
 import pandas as pd
 import requests
-from bs4 import BeautifulSoup
+import os
 
-
-def links_bny(name_output):
+def links_bny(name_output, move_to):
     '''
     Descrever função
 
@@ -68,15 +67,11 @@ def links_bny(name_output):
 
         # Consulting each on each one of the IDs
         # to get all the funds on the website
-
         my_pages = []
         controle = {'TOTAL': []}
         list_2 = {'FUNDOS': [], 'CNPJ': [], 'URL': []}
 
-        key_list = list(inicial_list.keys())
         val_list = list(inicial_list.values())
-
-        gestores = val_list[0]
         gestores_ids = val_list[1]
 
         my_size = len(gestores_ids)
@@ -250,4 +245,9 @@ def links_bny(name_output):
 
     df = pd.DataFrame(list_2)
     df.to_excel(name_output, index=False)
-    print('Informações extraídas com sucesso')
+
+    local_dir = f'{os.getcwd()}/{name_output}'
+    move_dir = f'{move_to}/{name_output}'
+
+    os.replace(local_dir, move_dir)
+    print('URLs extraídas com sucesso')

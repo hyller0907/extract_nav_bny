@@ -1,19 +1,10 @@
-#!/home/hvianna/anaconda3/bin/python
-
-from search_it import GET_NEV
-
+from yesterday import show_yday
 import pandas as pd
-import requests
-from bs4 import BeautifulSoup
-from easygui import *
-from tkinter import *
-import tkinter as tk
-from tkinter import filedialog
-from datetime import date
-from pandas.tseries.offsets import BDay
 
+calendar_file = 'ANBIMA.txt'
 
-
+def finalstep(df_extracted, file_output):
+    df_final = pd.DataFrame(df_extracted)
 
     my_dict = {'data': [], 'cota': []}
     res = [ele for ele in df_final['INFO'] if ele.strip()]
@@ -30,9 +21,9 @@ from pandas.tseries.offsets import BDay
 
         resultado_clean = [i for i in resultado if i!='nao_encontrada']
 
-        today = date.today()
-        target_day = today - BDay(1)
-        extract_carteiras_day = target_day.strftime("%d/%m/%Y")
+        my_yesterday = show_yday(calendar_file)
+        extract_carteiras_day = my_yesterday.strftime("%d/%m/%Y")
+        fname = my_yesterday.strftime("%Y%m%d")
 
         '''
         Por algum motivo o site esta apresentando erro
@@ -57,9 +48,7 @@ from pandas.tseries.offsets import BDay
     df_final = df_final.drop(['CHECK', 'INFO'], axis = 1)
     df_final = df_final.reset_index(drop = True)
 
-    df_final.to_excel('output_file.xlsx', index = False)
-    print('Script Finalizado')
+    file_name = f'{file_output}{fname}.xlsx'
+    df_final.to_excel(file_name, index = False)
 
-else:  # user chose Cancel
-    print('Favor realizar a importação do seu modelo de consulta')
-    sys.exit(0)
+    return file_name

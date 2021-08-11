@@ -9,28 +9,28 @@ in shell.
 
 '''
 
-import os
-
 from cont_df import jdf
 from mellon_links import links_bny
 from nav_info import get_nav
-from yesterday import show_yday
+from step4 import finalstep
 
-urls = 'bny_urls.xlsx'
-finput = 'my_input.xlsx'
-calendar_file = 'ANBIMA.txt'
+import os
+
+my_files = r'/home/hvianna/Desktop/bny_extract/my_files'
+
+urls = os.path.join(my_files, "bny_urls.xlsx")
+finput = os.path.join(my_files, "my_input.xlsx")
+final_output = 'CotaDiaria_BNY'
 
 if __name__ == "__main__":
     double_check = os.path.isfile(urls)
 
     if double_check == False:
-        links_bny(name_output=urls)
+        links_bny(name_output=urls, move_to=my_files)
 
     if double_check == True:
-        my_yesterday = show_yday(calendar_file)
-        print(my_yesterday)
+        pre_df = jdf(bny_file=urls, user_file=finput)
+        final_dataframe = get_nav(tg_dataframe=pre_df)
+        fatality = finalstep(df_extracted=final_dataframe, file_output=final_output)
 
-        # pre_df = jdf(bny_file=urls, user_file=finput)
-        # final_dataframe = get_nav(tg_dataframe=pre_df)
-        #
-        # final_dataframe.to_excel('TEMP', index=False)
+print('Código executado com sucesso')

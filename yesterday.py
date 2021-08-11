@@ -5,10 +5,7 @@ from bizdays import Calendar
 
 
 def show_yday(calendar_file):
-    '''
-    BLA-BLA-BLA
 
-    '''
     f = open(calendar_file, 'r').read().split('\n')
     holidays = [d.date() for d in pd.to_datetime(f)]
 
